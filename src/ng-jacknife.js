@@ -1,6 +1,30 @@
 'use strict';
+
+//E 8 and below do not have the Array.prototype.indexOf method
+var indexOf = function(needle) {
+    if(typeof Array.prototype.indexOf === 'function') {
+        indexOf = Array.prototype.indexOf;
+    } else {
+        indexOf = function(needle) {
+            var i = -1, index = -1;
+
+            for(i = 0; i < this.length; i++) {
+                if(this[i] === needle) {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
+        };
+    }
+
+    return indexOf.call(this, needle);
+};
+
+
 angular
-    .module('ng-jacknife', [])
+    .module('ngJacknife', [])
     .directive('button', function() {
       return {
         restrict : 'E',
@@ -199,9 +223,7 @@ angular
           return {
             restrict : 'E',
             replace : true, // or not will append
-            transclude : true, // transclude only children or 'element' => all
-                                // i.e
-            // ng-repeat
+            transclude : true, // transclude only children or 'element' => all including element itself i.e. ng-repeat
             template : '<div class="alert alert-{{type}}">'
                 + '<button type="button" class="close"'
                 + 'ng-click="close()">&times;' + '</button>'
@@ -228,6 +250,7 @@ angular
               }
               if (newValue) {
                 childScope = scope.$new();
+                //scope can only be passed in transclude in postLink or can use controller: function(..,$transclude)
                 childElement = transclude(childScope, function(clone) {
                   element.after(clone);
                 });
@@ -266,7 +289,9 @@ angular
       return {
         restrict:'E',
         //priority : 500,
-        controller:'AccordionController',
+        //directive controller init behaviour for dom rather than scope as in normal controllers
+        //can be injected with $element, $attrs, $transclude i.e append($transclude())
+        controller:'AccordionController', 
         link: function(scope, element, attrs) {
           element.addClass('accordion');
        }
@@ -391,5 +416,39 @@ angular
         };
       }
     }
-   })    
+   })
+   .filter('numberText',function(){
+       return function(v, decimalPlaces){
+           if(_.isUndefined(v)){
+               return '';
+           }
+           var n = Number(v);
+           var abs = Math.abs(n);
+           var text = '';
+           var bigNums = [
+               {id:'B', num: 1.0e+9},
+               {id:'M', num: 1.0e+6},
+               {id:'K', num: 1.0e+3}
+           ];
+
+           for(var i = 0; i < bigNums.length;i++){
+            if(abs >= bigNums[i].num){
+                n /= bigNums[i].num;
+                text = bigNums[i].id;
+                break;
+            }
+           };
+           if(decimalPlaces){
+                n = n.toFixed(decimalPlaces);
+           }
+           return n + text;
+       };
+   })
+   .filter('percent', ['$filter', function ($filter) {
+        return function (input, decimals) {
+            var v = $filter('number')(input * 100, decimals);
+            if(v === "") return "";
+            return  v + '%';
+        };
+    }])
 ;

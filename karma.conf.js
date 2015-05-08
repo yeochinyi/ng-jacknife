@@ -16,6 +16,8 @@ module.exports = function(config) {
             'bower_components/jquery-ui/jquery-ui.js',
             'bower_components/angular/angular.js',
             'bower_components/angular-mocks/angular-mocks.js',
+            'bower_components/sockjs-client/dist/sockjs.js',
+            'bower_components/stomp-websocket/lib/stomp.js',
             'src/ng-jacknife.js',
             'test/ng-jacknifeSpec.js'
         ],
@@ -42,7 +44,7 @@ module.exports = function(config) {
         // - PhantomJS
         // - IE (only Windows)
         //browsers: ['PhantomJS'],
-        browsers: ['Chrome'],
+        browsers: ['PhantomJS'],
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit

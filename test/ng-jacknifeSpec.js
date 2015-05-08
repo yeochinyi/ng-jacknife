@@ -1,7 +1,7 @@
 'use strict';
 describe('sample button directive', function() {
   var $compile, $rootScope;
-  beforeEach(module('ng-jacknife'));
+  beforeEach(module('ngJacknife'));
   beforeEach(inject(function(_$compile_, _$rootScope_) {
     $compile = _$compile_;
     $rootScope = _$rootScope_;
@@ -25,7 +25,7 @@ describe(
     function() {
       var $scope, element, lis;
 
-      beforeEach(module('ng-jacknife'));
+      beforeEach(module('ngJacknife'));
       beforeEach(inject(function($compile, $rootScope, $httpBackend) {
         $scope = $rootScope.$new();
         // $httpBackend.expectGET('i18n/en.json').respond(200, '');
@@ -111,7 +111,7 @@ describe(
     function() {
       // var $scope, modelCtrl, modelValue;
       var $scope, element;
-      beforeEach(module('ng-jacknife'));
+      beforeEach(module('ngJacknife'));
       beforeEach(inject(function($compile, $rootScope) {
         $scope = $rootScope.$new();
         $scope.test1 = 'true';
@@ -199,7 +199,7 @@ describe(
     function() {
       var Users, element, $scope;
       beforeEach(module('mock.users'));
-      beforeEach(module('ng-jacknife'));
+      beforeEach(module('ngJacknife'));
       beforeEach(inject(function($compile, $rootScope, _Users_) {
         Users = _Users_;
         spyOn(Users, 'query').and.callThrough();
@@ -232,7 +232,7 @@ describe(
 
 describe('simple use on input element', function() {
   var aDate, element, $scope;
-  beforeEach(module('ng-jacknife'));
+  beforeEach(module('ngJacknife'));
   beforeEach(inject(function($compile, $rootScope) {
     $scope = $rootScope.$new();
     aDate = new Date(11, 11, 11);
@@ -263,7 +263,7 @@ describe('simple use on input element', function() {
 
 describe('testing misc', function() {
   var element, scope;
-  beforeEach(module('ng-jacknife'));
+  beforeEach(module('ngJacknife'));
   beforeEach(inject(function($compile, $rootScope) {
     scope = $rootScope.$new();
     element = $compile('<div><div if="someVar"></div></div>')(scope);
@@ -297,7 +297,7 @@ describe('testing misc', function() {
 
 describe('accordion-group test', function() {
   var scope, element, groups;
-  beforeEach(module('ng-jacknife'));
+  beforeEach(module('ngJacknife'));
   beforeEach(inject(function($rootScope, $compile) {
     
     //scope = $rootScope;
@@ -322,7 +322,7 @@ describe('accordion-group test', function() {
 
 describe('field test', function() {
   var scope, element;
-  beforeEach(module('ng-jacknife'));
+  beforeEach(module('ngJacknife'));
   beforeEach(inject(function($rootScope, $compile,$httpBackend) {
     
   var template = 
@@ -361,7 +361,36 @@ describe('field test', function() {
     var controls = element.find('.controls');
     console.log(element);
    });
-});
+})
+
+describe('stompFactory', function () {
+
+  beforeEach(module('ngJacknife'));
+  beforeEach(module(function ($provide) {
+    $provide.factory('stompFactory', function () {
+      //return sinon.spy();
+    });
+  }));
+})
+
+describe('Filters', function () {
+
+  beforeEach(module('ngJacknife'));
+  it('correct format', inject(function(numberTextFilter) {
+    expect(numberTextFilter(1500)).toBe('1.5K');
+    expect(numberTextFilter(1500000)).toBe('1.5M');
+    expect(numberTextFilter(1500000000)).toBe('1.5B');
+
+    expect(numberTextFilter(1234,2)).toBe('1.23K');
+    expect(numberTextFilter(1234567,3)).toBe('1.235M');
+    expect(numberTextFilter(null)).toBe('0');
+    expect(numberTextFilter(undefined)).toBe('');
+
+   }));  
+})
+
+
+;
 
 
 
