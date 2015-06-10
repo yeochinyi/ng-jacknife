@@ -20,6 +20,31 @@ describe('sample button directive', function() {
   });
 });
 
+
+describe('alert directive', function() {
+  var $compile, $rootScope;
+  beforeEach(module('ngJacknife'));
+  beforeEach(inject(function(_$compile_, _$rootScope_) {
+    $compile = _$compile_;
+    $rootScope = _$rootScope_;
+  }));
+  it('testing alert', function() {
+    $rootScope.msg = '123';
+    $rootScope.testType = 'testVar';
+    var hasClosed;
+    $rootScope.closeAlert = function(input){
+      hasClosed = input;
+      //console.log('closed!');
+    };
+    var element = $compile('<div alert type="testType" close="closeAlert(testType)" >{{msg}}</div>')($rootScope);
+    var b = element.find('button'); 
+    $(b).click();
+    $rootScope.$digest();
+    //console.log(element);
+    expect(hasClosed).toBe('testVar');
+  });
+});
+
 describe(
     'sample pagination directive',
     function() {
@@ -359,7 +384,7 @@ describe('field test', function() {
   }));
   it('correct format', function() {
     var controls = element.find('.controls');
-    console.log(element);
+    //console.log(element);
    });
 })
 
@@ -387,10 +412,54 @@ describe('Filters', function () {
     expect(numberTextFilter(undefined)).toBe('');
 
    }));  
-})
+});
 
 
-;
+describe('numShorthand', function () {
+
+  var $scope;
+  var element;
+  
+  beforeEach(module('ngJacknife'));
+  beforeEach(inject(function($compile, $rootScope) {
+    $scope = $rootScope.$new();
+    var html = '<form name="testForm">' 
+        + '<input id="testInput" name="testInput"'
+        + 'ng-model="testValue"' + ' num-shorthand>'
+        + '</form>';
+    element = $compile(html)($scope);
+    $scope.$digest();
+  }));
+  describe(
+      'set numbers',
+      function() {
+        it('test billions', function() {
+          element.find("#testInput").val('2.2b').trigger("input");
+          $scope.$digest();
+          expect($scope.testValue).toBe(2200000000);
+        });
+        it('test millions', function() {
+          element.find("#testInput").val('1.2m').trigger("input");
+          $scope.$digest();
+          expect($scope.testValue).toBe(1200000);
+        });        
+        it('test thousands', function() {
+          element.find("#testInput").val('0.2k').trigger("input");
+          $scope.$digest();
+          expect($scope.testValue).toBe(200);
+        });
+        it('test normal', function() {
+          element.find("#testInput").val('12312.1232').trigger("input");
+          $scope.$digest();
+          expect($scope.testValue).toBe(12312.1232);
+        });
+        it('test weird', function() {
+          element.find("#testInput").val('234bbasdf').trigger("input");
+          $scope.$digest();
+          expect($scope.testValue).toBe(234);
+        });        
+      });
+});
 
 
 

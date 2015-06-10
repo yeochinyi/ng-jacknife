@@ -106,9 +106,7 @@ angular
           function validateEqual(myValue) {
             var valid = (myValue === scope.$eval(attrs.validateEquals));
             // $setValidity(validationErrorKey, isValid) called to set whether
-            // the
-            // model is
-            // valid for a given kind of validation error
+            // the model is valid for a given kind of validation error
             ngModelCtrl.$setValidity('equal', valid);
             return valid ? myValue : undefined;
           }
@@ -136,7 +134,7 @@ angular
         scope : false,
         require : 'ngModel',
         link : function(scope, element, attrs, ngModelCtrl) {
-          var original;
+          var original; //used to detect changes
           ngModelCtrl.$formatters.unshift(function(modelValue) {
             original = modelValue;
             return modelValue;
@@ -178,9 +176,7 @@ angular
                 scope.$apply(function() {
                   // To get the data out, we use the onSelect callback to call
                   // ngModel.$setViewValue(), which updates the view value and
-                  // triggers
-                  // the
-                  // $parsers pipeline.
+                  // triggers the $parsers pipeline.
                   var date = element.datepicker("getDate");
                   element.datepicker("setDate", element.val());
                   ngModelCtrl.$setViewValue(date);
@@ -221,16 +217,17 @@ angular
         'alert',
         function() {
           return {
-            restrict : 'E',
+            restrict : 'AEC',
             replace : true, // or not will append
             transclude : true, // transclude only children or 'element' => all including element itself i.e. ng-repeat
-            template : '<div class="alert alert-{{type}}">'
+            template : '<div class="alert-{{type}}">'
                 + '<button type="button" class="close"'
                 + 'ng-click="close()">&times;' + '</button>'
                 + '<div ng-transclude></div>' + '</div>',
             scope : {
-              type : '=',
+              type : '@',
               close : '&'
+              
             }
           };
         })
@@ -417,6 +414,72 @@ angular
       }
     }
    })
+   .directive('numShorthand', ['$log', function($log) {
+     
+     var bigNums = {B: 1.0e+9,
+                    M: 1.0e+6,
+                    K: 1.0e+3};
+     
+     
+     var addCommasToInteger = function(value) {
+       var val = "" + value;
+       var commas, decimals, wholeNumbers;
+       decimals = val.indexOf('.') == -1 ? '' : val.replace(/^-?\d+(?=\.)/, '');
+       wholeNumbers = val.replace(/(\.\d+)$/, '');
+       commas = wholeNumbers.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+       return "" + commas + decimals;
+     };
+     
+      return {
+        restrict : 'A',
+        require : 'ngModel',
+        scope : false,
+        link : function(scope, elm, attrs, ngModelCtrl) {
+          // Called in turn when the value of the input element changes
+          ngModelCtrl.$parsers.push(function(val){
+//            if(_.isNumber(+val)){
+//              return +val;
+//            }
+            var value = "" + val;
+            try{
+              var index = value.length - 1;
+              var last = value.charAt(index).toUpperCase();
+              var num = bigNums[last];
+              if(!num){
+                $log.warn("Can't parse:" + value)
+                //ngModelCtrl.$setViewValue(addCommasToInteger(value));
+                return parseFloat(value);
+              }
+              var digits = parseFloat(value.substring(0,index));
+              var ret = digits * num;
+              ngModelCtrl.$setViewValue(addCommasToInteger(ret));
+              return ret;
+            }
+            catch(e){
+              $log.warn("Can't parse:" + value)
+              //ngModelCtrl.$setViewValue(addCommasToInteger(value));
+              return parseFloat(value);
+            }
+          });
+          // Called in turn when the value of the model changes.
+          ngModelCtrl.$formatters.push(addCommasToInteger);
+        }
+      };
+    }])
+        .directive('sort',['$compile',function($compile) {
+        return {
+            restrict: 'A',
+            transclude: true,
+            //scope: { by:'@'},
+            scope : {
+              sort : '@'
+            },
+            template: 
+                '<span style="white-space: nowrap;" ng-click="sortFn(sort)"><span ng-transclude></span>&nbsp;' +
+                    '<i class="fa" ng-class="{\'fa-sort-asc\': isSortUp(\'{{sort}}\'), \'fa-sort-desc\': isSortDown(\'{{sort}}\')}"></i></span>'
+        };
+    }])
+
    .filter('numberText',function(){
        return function(v, decimalPlaces){
            if(_.isUndefined(v)){
