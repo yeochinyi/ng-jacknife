@@ -9,6 +9,13 @@ module.exports = function(config) {
         // testing framework to use (jasmine/mocha/qunit/...)
         frameworks: ['jasmine'],
 
+        plugins: [
+            'karma-phantomjs-launcher',
+            //'karma-chrome-launcher',
+            'karma-jasmine'
+        ],
+
+
         // list of files / patterns to load in the browser
         files: [
             'bower_components/lodash/lodash.js',
@@ -43,8 +50,8 @@ module.exports = function(config) {
         // - Safari (only Mac)
         // - PhantomJS
         // - IE (only Windows)
-        //browsers: ['PhantomJS'],
-        browsers: ['Chrome'],
+        browsers: ['PhantomJS'],
+        //browsers: ['Chrome'],
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit
